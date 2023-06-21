@@ -3,25 +3,32 @@ import common as com
 
 def main():
     # パスを設定する
-    path = ''
+    config = com.getConfig()
+    path = config["datapackPath"]
 
     # インスタンスを作成
-    doc = com.dataPack()
-    doc.getFolder(path)
+    folderList = com.getFolder(path)
+    html = com.docHtml()
 
     # 単体のデータパックを指定した場合パスを修正する
-    if not doc.folderName:
+    if not folderList:
         modifyPath = path.split("/")[0:-1]
-        doc.folderName.append(path.split("/")[-1])
+        folderList.append(path.split("/")[-1])
         path = ""
-        for data in modifyPath:
+        for data in modifyPath: 
             path += f"{data}/"
-        path.strip()
 
     # htmlファイルを作成する
-    for folderName in doc.folderName:
-        functionList = doc.getFuntionList(path, folderName)
-        docStringList = doc.getDocString(folderName, functionList)
-        doc.setContents(docStringList, folderName)
+    for folderName in folderList:
+        # フォルダごとにインスタンスを作成する
+        datapack = com.dataPack(folderName)
+        functionList = datapack.getFuntionList(path, folderName)
+        baseData = datapack.getDocString(functionList)
+        # print(baseData)
+        html.setContents(baseData)
+        html.setHtml()
+        # print(page)
+
+        # doc.setContents(docStringList, folderName, functionList)
 
 main()

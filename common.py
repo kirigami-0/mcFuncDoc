@@ -1,45 +1,43 @@
 import os
 import glob
-
+import json
 
 class docHtml:
-    def __init__(self, folderName, fileName):
-        self.folderName = folderName
-        self.htmlContents = ""
-        self.fileName = fileName
+    def __init__(self):
+        try:
+            os.mkdir("./docs")
+        except FileExistsError:
+            pass
         self.page = ""
-        self.contentsTree = ""
-    
-    def setContents(self, data):
+        self.fileName = ""
+        self.folderName = ""
+
+
+    def setContents(self, baseData):
         """
         右側の内容を設定する
 
         Parameters
         ----------
-        data : list
+        baseData : dict
             コメントが格納されているリスト
         fileName : str
             ファイルリスト
         """
-        for contents in data:
-            divClass = ""
-            for content in contents:
-                divClass += f"""
-                <div>
-                    {content}
-                </div>
-                """
-        htmlContents = f"""
-        <div>
-            {divClass}
-        </div>
-        """
-        htmlContents = htmlContents.replace("\n                \n","\n")
-        htmlContents = htmlContents.replace("\n            \n","\n")
-        htmlContents = htmlContents.replace("\n        <div>","        <div>")
-        self.htmlContents = htmlContents
+        self.folderName = baseData["folderName"]
+        for contents in baseData["contents"]:
+            self.fileName = contents["fileName"]
+            for docStringBlock in contents["docString"]:
+                docBlock = ""
+                for docStringList in docStringBlock:
+                    divContents = ""
+                    for docString in docStringList:
+                        divContents += f"""\t\t\t\t\t\t\t\t<div>{docString}</div>\n"""
+                    docBlock += f"""\t\t\t\t\t\t\t<div class="A">\n{divContents}\t\t\t\t\t\t\t</div>\n"""
+                    self.setDocHtml(docBlock)
+                    self.setHtml()
 
-    def setDocHtml(self):
+    def setDocHtml(self, docBlock, contentsTree=""):
         """
         htmlファイルの内容を設定する。
         """
@@ -60,10 +58,10 @@ class docHtml:
                         </div>
                     <div class="contents_area">
                         <div class="left_area back_ground">
-                            {self.contentsTree}
+                            {contentsTree}
                         </div>
                         <div class="right_area back_ground">
-                            {self.htmlContents}
+{docBlock}
                         </div>
                     </div>
                 </div>
@@ -71,43 +69,73 @@ class docHtml:
         </html>
         """
 
-
     def setHtml(self):
         """
         htmlファイルを作成する
         """
-        self.setDocHtml()
+        try:
+            os.mkdir(f"./docs/{self.folderName}")
+        except FileExistsError:
+            pass
+        print(f"{self.folderName}/{self.fileName}")
         with open(f"./docs/{self.folderName}/{self.fileName}.html", "w", encoding="utf-8") as f:
             f.write(self.page)
 
 
 
+
+def getConfig():
+    """
+    設定ファイルを読み取る
+
+    Returns
+    -------
+    config : dict
+        設定データ
+    """
+    with open("./config.json", "r", encoding="utf-8") as f:
+        config = json.load(f)
+    return config
+
+
 class dataPack:
-    def __init__(self):
-        self.folderName = []
-        self.docStringList = []
-        try:
-            os.mkdir("./docs")
-        except FileExistsError:
-            pass
-
-
-    def getFolder(self, path):
+    def __init__(self, folderName):
+        self.baseData = {
+            "folderName": folderName,
+            "contents": []
+        }
+        
+    
+    def getDocString(self, functionList):
         """
-        フォルダー名を取得する。
+        docStringを取得する
 
         Parameters
         ----------
-        path : str
-            パス
+        folderName : str
+            フォルダー名
+        functionList : list
+            mcfunctionが格納されたリスト
+            
+        returns
+        -------
+        docStringList : list
+            コメントリスト
         """
-        ignoreFile = ("LICENSE", "data")
-        for entry in os.scandir(path):
-            # フォルダーのみを取得する
-            if entry.is_dir():
-                if not entry.name.startswith(".") and not entry.name in ignoreFile:
-                    self.folderName.append(entry.name)
-    
+
+        for functionPath in functionList:
+            contents = {
+                "fileName": "",
+                "docString": []
+            }
+            fileName = functionPath.split("/")[-1]
+            fileName = fileName[:fileName.find(".")]
+            contents["fileName"] = fileName
+            contents["docString"].append(self.readFile(functionPath))
+            self.baseData["contents"].append(contents)
+
+        return self.baseData
+
 
     def getFuntionList(self, path, folderName):
         """
@@ -172,48 +200,26 @@ class dataPack:
         return docStringList
 
 
-    def getDocString(self, folderName, functionList):
-        """
-        docStringを取得する
 
-        Parameters
-        ----------
-        folderName : str
-            フォルダー名
-        functionList : list
-            mcfunctionが格納されたリスト
-            
-        returns
-        -------
-        docStringList : list
-            コメントリスト
-        """
 
-        try:
-            os.mkdir(f"./docs/{folderName}")
-        except FileExistsError:
-            pass
-        docStringList = []
-        for functionPath in functionList:
-            docStringList.append(self.readFile(functionPath))
-        return docStringList
+def getFolder(path):  
+    """データパックのフォルダ名を取得する
 
-    def setContents(self, docStringList, folderName):
-        """
-        docStringを取得する
+    Parameters
+    ----------
+    path : str
+        パス
 
-        Parameters
-        ----------
-        docStringList : list
-            コメントリスト
-        folderName : str
-            フォルダー名
-        """
-
-        for data in docStringList:
-            if data:
-                fileName = data[0][0]
-                fileName = fileName[fileName.find(":") + 1 :].replace("/", "-")
-                html = docHtml(folderName, fileName)
-                html.setContents(data)
-                html.setHtml()
+    Returns
+    -------
+    folderList : list
+        フォルダリスト
+    """
+    ignoreFile = ("LICENSE", "data")
+    folderList = []
+    for entry in os.scandir(path):
+        # フォルダーのみを取得する
+        if entry.is_dir():
+            if not entry.name.startswith(".") and not entry.name in ignoreFile:
+                folderList.append(entry.name)
+    return folderList

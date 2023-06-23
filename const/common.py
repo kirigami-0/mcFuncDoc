@@ -172,7 +172,7 @@ class docHtml():
             for string in data["docStringList"]:
                 stringBlock += f"""\t\t\t<div class="contents">\n{string}\t\t\t</div>\n"""
             file = self.getTemplate()
-            file = self.setContents(file, stringBlock[-1], title)
+            file = self.setContents(file, stringBlock[:-1], title)
             self.writeHtml(baseData['folderName'], data['fileName'], file)
 
 
@@ -198,6 +198,7 @@ class docHtml():
         file = file.replace("%(TITLE)", title)
         file = file.replace("%(CONTENTS)", contents)
         file = file.replace("%(INDEX)", index)
+        print(file)
         return file
     
     def writeHtml(self, folderName, fileName, fileData):

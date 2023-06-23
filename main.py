@@ -1,4 +1,4 @@
-import common as com
+import const.common as com
 
 
 def main():
@@ -18,17 +18,13 @@ def main():
         for data in modifyPath: 
             path += f"{data}/"
 
-    # htmlファイルを作成する
     for folderName in folderList:
         # フォルダごとにインスタンスを作成する
         datapack = com.dataPack(folderName)
         functionList = datapack.getFuntionList(path, folderName)
+        # ドキュメント化可能なデータを取得する
         baseData = datapack.getDocString(functionList)
-        # print(baseData)
-        html.setContents(baseData)
-        html.setHtml()
-        # print(page)
-
-        # doc.setContents(docStringList, folderName, functionList)
+        # ドキュメント出力
+        html.setHtml(baseData)
 
 main()

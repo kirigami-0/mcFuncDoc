@@ -1,4 +1,17 @@
 {
     "datapackPath": "./TheSkyBlessing-master/OhMyDat",
-    "theme": "default"
+    "theme": "default",
+    "annotationsColor": {
+        "@user": "#FFFFFF",
+        "@public": "#EEEEEE",
+        "@api": "#EEEEEE",
+        "@context": "#DDDDDD",
+        "@within": "#CCCCCCC",
+        "@handles": "#BBBBBBB",
+        "@patch": "#AAAAAAA",
+        "@input": "#999999",
+        "@output": "#888888",
+        "@reads": "#777777",
+        "@writes": "#66666"
+    }
 }

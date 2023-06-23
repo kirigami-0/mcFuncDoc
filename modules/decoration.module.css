@@ -26,3 +26,9 @@
 .link_color {
     color: #c8d5ff;
 }
+
+.contents {
+    background-color: #444444;
+    margin-bottom: 30px;
+    box-shadow: 5px 10px 10px -6px #000000;
+}

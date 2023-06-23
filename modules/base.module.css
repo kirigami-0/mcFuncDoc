@@ -9,7 +9,7 @@ div {
 }
 
 .left_area {
-    width: calc(20% - 30px);
+    width: 20%
 }
 
 .header_area {
@@ -33,11 +33,13 @@ div {
 }
 .left_area,
 .right_area {
-    padding: 30px 0 0 30px;
+    padding: 40px 0 0 0;
 }
 .right_area {
-    width: calc(80% - 30px);
+    width: 70%;
     border-left: 2px dashed #9c9c9c;
+    padding-left: 5%;
+    padding-right: 5%;
 }
 
 .contents_area {
@@ -51,8 +53,4 @@ div {
 
 .header_title {
     width: 80%;
-}
-
-.contents_box {
-    background-color: #AAAAAA;
 }

@@ -25,6 +25,9 @@ def main():
         # ドキュメント化可能なデータを取得する
         baseData = datapack.getDocString(functionList)
         # ドキュメント出力
-        html.setHtml(baseData)
+        indexData = html.setHtml(baseData)
+        html.setIndex(path, folderName, indexData)
+
+    html.setHome(folderList)
 
 main()

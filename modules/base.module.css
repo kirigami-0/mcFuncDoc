@@ -3,13 +3,14 @@ html {
     margin: 0 auto;
     background-color: #eeffee;
     display: block;
+    overflow-x: hidden;
 }
 div {
     display: block;
 }
-
-.left_area {
-    width: 20%
+a {
+    display: block;
+    margin: auto;
 }
 
 .header_area {
@@ -23,18 +24,38 @@ div {
 }
 
 .base_area {
-    overflow: auto;
+    overflow: hidden;
 }
-.base_area::-webkit-scrollbar {
+/* .base_area::-webkit-scrollbar {
     width: 10px;
 }
 .base_area::-webkit-scrollbar-track {
     border-radius: 5px;
-}
+} */
 .left_area,
 .right_area {
     padding: 40px 0 0 0;
+    white-space:unset;
+    overflow-x: unset;
+    height: 100%;
 }
+.left_area {
+    width: 20%;
+    overflow-y: scroll;
+    word-break: break-all;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 0;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #777777;
+    border-radius: 5px;
+}
+
+
 .right_area {
     width: 70%;
     border-left: 2px dashed #9c9c9c;

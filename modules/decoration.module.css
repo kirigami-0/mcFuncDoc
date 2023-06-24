@@ -10,6 +10,20 @@
     height: 100%;
 }
 
+.index {
+    
+    border-radius: 10px;
+    background-color: #56719e;
+    margin-left: 5%;
+    margin-right: 5%;
+    margin-bottom: 10px;
+}
+
+.index:hover {
+    transition: background-color 0.3s;
+    background-color: #49618a;
+}
+
 /* color */
 .header {
     background-color: #1b1b1b;
@@ -25,6 +39,12 @@
 
 .link_color {
     color: #c8d5ff;
+}
+.link {
+    display: flex;
+    font-size: 17px;
+    justify-content: center;
+    padding: 0 10px 0 10px;
 }
 
 .contents {

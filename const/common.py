@@ -1,6 +1,7 @@
 import glob
 import json
 import os
+from ast import literal_eval
 
 def getConfig():
     """
@@ -112,12 +113,14 @@ class dataPack:
             コメント情報が乗った辞書
         """
         # ファイルを行ごとに読み込む
+        
         with open(filePath, "r", encoding="utf-8") as f:
             lineTextList = f.readlines()
 
         isDocString = False
         comment = ""
-        filePath = filePath.split("/")[-1].replace(".mcfunction","")
+        filePath = filePath.split("functions/")[-1].replace(".mcfunction","")
+        filePath = filePath.replace("/","-")
         docStringDict = {
             "fileName": filePath,
             "docStringList": []
@@ -142,7 +145,7 @@ class docHtml():
     def __init__(self):
         pass
 
-    def getTemplate(self):
+    def getTemplate(self, isHome=False):
         """
         HTMLファイルを取得する
 
@@ -151,8 +154,12 @@ class docHtml():
         file: str
             ファイル
         """
-        with open("./const/template.html", "r", encoding="utf-8") as f:
-            file = f.read()
+        if isHome:
+            with open("./const/HOME.html", "r", encoding="utf-8") as f:
+                file = f.read()
+        else:
+            with open("./const/template.html", "r", encoding="utf-8") as f:
+                file = f.read()
         return file
 
 
@@ -165,18 +172,45 @@ class docHtml():
         baseData : dict
             ドキュメント用のデータが格納された事象
         """
-
+        indexData = ""
+        for index in baseData["contents"]:
+            indexData += f"""\t\t\t\t\t<div class="index"><a class="link link_color" href="./{index["fileName"]}.html">{index["fileName"]}</a></div>\n"""
         for data in baseData["contents"]:
             title = f"{baseData['folderName']}:{data['fileName']}"
             stringBlock = ""
             for string in data["docStringList"]:
                 stringBlock += f"""\t\t\t<div class="contents">\n{string}\t\t\t</div>\n"""
             file = self.getTemplate()
-            file = self.setContents(file, stringBlock[:-1], title)
+            file = self.setContents(file, stringBlock[:-1], title, indexData[:-1])
             self.writeHtml(baseData['folderName'], data['fileName'], file)
+        return indexData
+
+    def setIndex(self, path, folderName, indexData):
+        # mcmetaの情報を取ってくる
+        with open(f"{path}/{folderName}/pack.mcmeta", "r", encoding="utf-8") as f:
+            metaFile = f.read()
+        metaFile = literal_eval(metaFile)
+        pack_format = metaFile["pack"]["pack_format"]
+        description = metaFile["pack"]["description"]
+        data = f"""\t\t\t\t\t\t<div>pack_format : {pack_format}</div>\n"""
+        data += f"""\t\t\t\t\t\t<div>description : {description}</div>"""
+        metaData = f"""\t\t\t\t\t<div class="contents">\n{data}\n\t\t\t\t\t</div>\n"""[:-1]
+        file = self.getTemplate()
+        file = self.setContents(file, metaData, folderName, indexData[:-1])
+        self.writeHtml(folderName, "Index", file)
 
 
-    def setContents(self, file, contents, title, index=""):
+    def setHome(self, folderList):
+        file = self.getTemplate(True)
+        title = "HOME"
+        index = ""
+        for folderName in folderList:
+            index += f"""\t\t\t\t\t<div class="index"><a class="link link_color" href="./{folderName}/Index.html">{folderName}</a></div>\n"""
+        file = self.setContents(file, "", title, index)
+        self.writeHtml("", "HOME", file)
+
+
+    def setContents(self, file, contents, title, index):
         """ファイルコンテンツを設定する
 
         Parameters
@@ -198,7 +232,6 @@ class docHtml():
         file = file.replace("%(TITLE)", title)
         file = file.replace("%(CONTENTS)", contents)
         file = file.replace("%(INDEX)", index)
-        print(file)
         return file
     
     def writeHtml(self, folderName, fileName, fileData):
@@ -213,6 +246,7 @@ class docHtml():
         fileData : str
             ファイルデータ
         """
+        os.makedirs(f"./docs/{folderName}", exist_ok=True)
         with open(f"./docs/{folderName}/{fileName}.html", "w", encoding="utf-8") as f:
             f.write(fileData)
 

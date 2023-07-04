@@ -8,7 +8,7 @@ def main():
 
     # インスタンスを作成
     folderList = com.getFolder(path)
-    html = com.docHtml()
+    html = com.docHtml(config)
 
     # 単体のデータパックを指定した場合パスを修正する
     if not folderList:
@@ -24,10 +24,13 @@ def main():
         functionList = datapack.getFuntionList(path, folderName)
         # ドキュメント化可能なデータを取得する
         baseData = datapack.getDocString(functionList)
-        # ドキュメント出力
+        # # ドキュメント出力
         indexData = html.setHtml(baseData)
-        html.setIndex(path, folderName, indexData)
+        # html.setIndex(path, folderName, indexData)
 
-    html.setHome(folderList)
+    # html.setHome(folderList)
 
 main()
+
+# test = "#&emsp;@private"
+# print("@private" in test)

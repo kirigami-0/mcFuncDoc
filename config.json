@@ -1,17 +1,17 @@
 {
-    "datapackPath": "./TheSkyBlessing-master",
+    "datapackPath": "./TheSkyBlessing-master/TheSkyBlessing",
     "theme": "default",
     "annotationsColor": {
         "@user": "#FFFFFF",
         "@public": "#EEEEEE",
-        "@api": "#EEEEEE",
-        "@context": "#DDDDDD",
-        "@within": "#CCCCCCC",
-        "@handles": "#BBBBBBB",
-        "@patch": "#AAAAAAA",
-        "@input": "#999999",
-        "@output": "#888888",
-        "@reads": "#777777",
-        "@writes": "#66666"
+        "@api": "#DDDDDD",
+        "@context": "#CCCCCC",
+        "@within": "#FF0000",
+        "@handles": "#AAAAAA",
+        "@patch": "#999999",
+        "@input": "#888888",
+        "@output": "#777777",
+        "@reads": "#666666",
+        "@writes": "#555555"
     }
 }

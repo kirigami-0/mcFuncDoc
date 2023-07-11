@@ -71,19 +71,6 @@ a {
     height: 100%;
 }
 
-/* .index {
-    border-radius: 10px;
-    background-color: #56719e;
-    margin-left: 5%;
-    margin-right: 5%;
-    margin-bottom: 10px;
-}
-
-.index:hover {
-    transition: background-ccontentsolor 0.3s;
-    background-color: #49618a;
-} */
-
 /* color */
 .link {
     font-size: 17px;
@@ -101,4 +88,8 @@ a {
 
 .bold { 
     font-weight: bold;
+}
+
+.api {
+	color: FF0000;
 }

@@ -1,15 +1,16 @@
+/*  */
 body,
 html {
     margin: 0 auto;
-    background-color: #eeffee;
     display: block;
+    overflow-x: hidden;
 }
 div {
     display: block;
 }
-
-.left_area {
-    width: calc(20% - 30px);
+a {
+    display: block;
+    margin: auto;
 }
 
 .header_area {
@@ -23,21 +24,26 @@ div {
 }
 
 .base_area {
-    overflow: auto;
-}
-.base_area::-webkit-scrollbar {
-    width: 10px;
-}
-.base_area::-webkit-scrollbar-track {
-    border-radius: 5px;
+    overflow: hidden;
+    
 }
 .left_area,
 .right_area {
-    padding: 30px 0 0 30px;
+    padding: 40px 0 0 0;
+    white-space:unset;
+    overflow-x: unset;
+    height: 100%;
 }
+.left_area {
+    width: 20%;
+    overflow-y: scroll;
+}
+
 .right_area {
-    width: calc(80% - 30px);
+    width: 70%;
     border-left: 2px dashed #9c9c9c;
+    padding-left: 5%;
+    padding-right: 5%;
 }
 
 .contents_area {
@@ -51,4 +57,39 @@ div {
 
 .header_title {
     width: 80%;
+}
+
+.title {
+    font-weight: bold;
+    font-size: 25px;
+}
+
+.center {
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    height: 100%;
+}
+
+/* color */
+.link {
+    font-size: 17px;
+    border-radius: 10px;
+    padding: 0 10px 0 10px;
+    margin-bottom: 10px;
+}
+
+.contents {
+    margin-bottom: 30px;
+    box-shadow: 5px 10px 10px -6px #000000;
+    white-space: nowrap;
+}
+
+.bold { 
+    font-weight: bold;
+}
+
+
+.index {
+    text-decoration: none;
 }

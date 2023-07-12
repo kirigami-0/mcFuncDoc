@@ -1,0 +1,49 @@
+::-webkit-scrollbar {
+    width: 10px;
+    height: 0;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #777777;
+    border-radius: 5px;
+}
+
+div {
+    color: #FFFFFF;
+}
+
+.header_text {
+    color: #ffffff;
+}
+
+.header_color {
+    color: #ffffff;
+}
+
+.link_area {
+    background-color: #aaaaFF;
+}
+
+.text_color {
+    color: #ffffff;
+}
+
+.back_ground {
+    background-color: #333333;
+}
+
+.header {
+    background-color: #1b1b1b;
+}
+
+.link_color {
+    color: #c8d5ff;
+}
+
+.normal {
+    color: #FFFFFF;
+}
+
+.index_color {
+    color: #161e61;
+}

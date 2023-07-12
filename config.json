@@ -1,0 +1,17 @@
+{
+    "datapackPath": "./TheSkyBlessing-master/TheSkyBlessing",
+    "theme": "default",
+    "annotationsColor": {
+        "@user": "#FF0000",
+        "@public": "#00FF00",
+        "@api": "#0000FF",
+        "@context": "#FFFF00",
+        "@within": "#00FFFF",
+        "@handles": "#FF00FF",
+        "@patch": "#FFF000",
+        "@input": "#FF00F0",
+        "@output": "#F0FF00",
+        "@reads": "#F000FF",
+        "@writes": "#00FFF0"
+    }
+}

@@ -1,27 +1,32 @@
-import common as com
-
+import const.common as com
 
 def main():
     # パスを設定する
-    path = ''
+    config = com.getConfig()
+    path = config["datapackPath"]
 
     # インスタンスを作成
-    doc = com.dataPack()
-    doc.getFolder(path)
+    folderList = com.getFolder(path)
+    page = com.controlFile('const/template.html', 'r')
+    # アノテーション用のCSSを作成する
+    com.setAnnotation(config["annotationsColor"])
 
     # 単体のデータパックを指定した場合パスを修正する
-    if not doc.folderName:
+    if not folderList:
         modifyPath = path.split("/")[0:-1]
-        doc.folderName.append(path.split("/")[-1])
+        folderList.append(path.split("/")[-1])
         path = ""
-        for data in modifyPath:
+        for data in modifyPath: 
             path += f"{data}/"
-        path.strip()
 
-    # htmlファイルを作成する
-    for folderName in doc.folderName:
-        functionList = doc.getFuntionList(path, folderName)
-        docStringList = doc.getDocString(folderName, functionList)
-        doc.setContents(docStringList, folderName)
-
+    for folderName in folderList:
+        # フォルダごとにインスタンスを作成する
+        datapack = com.dataPack(folderName)
+        functionList = datapack.getFuntionList(path, folderName)
+        # ドキュメント化可能なデータを取得する
+        docData = datapack.getDocString(functionList)
+        # ドキュメント出力
+        datapack.makeHtml(page, docData, folderName, config["theme"])
+    
+    datapack.makeHome(folderList, config["theme"])
 main()

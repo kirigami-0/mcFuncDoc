@@ -1,54 +1,7 @@
 import glob
 import json
 import os
-from ast import literal_eval
-
-class Html:
-    def __init__(self) -> None:
-        self.tab = "\t"
-        self.ln = "\n"
-        self.space = "&emsp;"
-        self.div = f'<div class="%(DIV_CLASS)">%(DIV_VALUE)</div>'
-        self.a = f'<a class=%(A_ClASS) href="%(A_PATH)">%(A_VALUE)</a>'
-    
-    def replaceValue(self, value, divData="", aData=""):
-        """データを置き換える
-
-        Parameters
-        ----------
-        value : str
-            置き換え前データ
-        divData : dict
-            divの置き換えデータ
-        aData : dict
-            aタグの置き換えデータ
-
-        Returns
-        -------
-        value : str
-            置き換え済みデータ
-        """
-        if divData:
-            value = value.replace("%(DIV_CLASS)", divData["divClass"] if divData["divClass"] else '""')
-            value = value.replace("%(DIV_VALUE)", divData["divValue"] if divData["divValue"] else '""')
-        if aData:
-            value = value.replace("%(A_ClASS)", aData["aClass"] if aData["aClass"] else '""')
-            value = value.replace("%(A_VALUE)", aData["aValue"] if aData["aValue"] else '""')
-            value = value.replace("%(A_PATH)", aData["aPath"] if aData["aPath"] else '""')
-        return value
-    
-    def getReplaceData(self):
-        divData = {
-            "divClass": "",
-            "divValue": ""
-        }
-        aData = {
-            "aClass": "",
-            "aValue": "",
-            "aPath": "",
-        }
-
-        return divData, aData
+import const.html as html
 
 def getConfig():
     """
@@ -59,8 +12,8 @@ def getConfig():
     config : dict
         設定データ
     """
-    with open("./config.json", "r", encoding="utf-8") as f:
-        config = json.load(f)
+    config = controlFile("./config.json", "r")
+    config = json.loads(config)
     return config
 
 
@@ -87,7 +40,7 @@ def getFolder(path):
     return folderList
 
 
-def controlFile(path, mode, fileData=""):
+def controlFile(path, mode, fileData={}):
     """ファイルを操作する
 
     Parameters
@@ -124,12 +77,30 @@ def makeFolder(path):
     """
     os.makedirs(path, exist_ok=True)
 
+
+def setAnnotation(annotations):
+    """アノテーション用のCSSを作成する
+
+    Parameters
+    ----------
+    annotations : dict
+        config上のアノテーションカラー
+    """
+    annotationsColor = ""
+    for key, color in annotations.items():
+        className = ".%(KEY) {\n\tcolor: %(COLOR); \n}\n"
+        className = className.replace("%(KEY)", key[1:]).replace("%(COLOR)", color)
+        annotationsColor += className
+    controlFile("modules/annotation.module.css", "w", annotationsColor)
+
 class dataPack:
     def __init__(self, folderName):
-        self.baseData = {
+        self.docData = {
             "folderName": folderName,
-            "contents": [],
+            "page": [],
+            "index":[]
         }
+        self.htmlData = html.HTML()
 
     def getFuntionList(self, path, folderName):
         """
@@ -159,56 +130,52 @@ class dataPack:
 
 
     def getDocString(self, functionList):
-        """
-        docStringを取得する
+        """ドキュメントデータを作成する
 
         Parameters
         ----------
         functionList : list
-            mcfunctionが格納されたリスト
-            
-        returns
+            ファンクションリスト
+
+        Returns
         -------
-        baseData : dict
-            ドキュメント化するファイルのデータ
+        docData : dict
+            ドキュメントデータ
         """
-
+        indexData = ''
         for functionPath in functionList:
-            # filrName = functionPath.split("/")[-1].replace(".mcfunction", "")
-            docStringDict = self.readFile(functionPath)
-            if docStringDict["docStringList"]:
-                self.baseData["contents"].append(docStringDict)
-        return self.baseData
+            pageData = self.readFile(functionPath)
+            indexData += self.getIndex(functionPath)
+            self.docData["page"].append(pageData)
+        self.docData["index"] = indexData
+        return self.docData
 
-    def checkAnnotation(self, text, divData):
-        divData["divValue"] = text
-        if "@user" in text:
-            divData["divClass"] = "user"
-        elif "@public" in text:
-            divData["divClass"] = "public"
-        elif "@api" in text:
-            divData["divClass"] = "api"
-        elif "@context" in text:
-            divData["divClass"] = "context"
-        elif "@within" in text:
-            divData["divClass"] = "within"
-        elif "@handles" in text:
-            divData["divClass"] = "handles"
-        elif "@patch" in text:
-            divData["divClass"] = "patch"
-        elif "@input" in text:
-            divData["divClass"] = "input"
-        elif "@output" in text:
-            divData["divClass"] = "output"
-        elif "@reads" in text:
-            divData["divClass"] = "reads"
-        elif "@writes" in text:
-            divData["divClass"] = "writes"
-        elif "@private" in text:
-            divData["divClass"] = "private"
-        else:
-            divData["divClass"] = "normal"
-        return divData
+    def checkAnnotation(self, text):
+        """アノテーションを設定する
+
+        Parameters
+        ----------
+        text : str
+            テキスト
+
+        Returns
+        -------
+        text : str
+            テキスト
+        """
+        text = text.replace("@user", self.htmlData.setSpan("user", "@user"))
+        text = text.replace("@public", self.htmlData.setSpan("public", "@public"))
+        text = text.replace("@api", self.htmlData.setSpan("api", "@api"))
+        text = text.replace("@context", self.htmlData.setSpan("context", "@context"))
+        text = text.replace("@within", self.htmlData.setSpan("within", "@within"))
+        text = text.replace("@handles", self.htmlData.setSpan("handles", "@handles"))
+        text = text.replace("@patch", self.htmlData.setSpan("patch", "@patch"))
+        text = text.replace("@input", self.htmlData.setSpan("input", "@input"))
+        text = text.replace("@output", self.htmlData.setSpan("output", "@output"))
+        text = text.replace("@reads", self.htmlData.setSpan("reads", "@reads"))
+        text = text.replace("@writes", self.htmlData.setSpan("writes", "@writes"))
+        text = text.replace("@private", self.htmlData.setSpan("private", "@private"))
+        return text
         
     def readFile(self, filePath):
         """
@@ -225,169 +192,96 @@ class dataPack:
             コメント情報が乗った辞書
         """
         # ファイルを行ごとに読み込む
-        
         with open(filePath, "r", encoding="utf-8") as f:
             lineTextList = f.readlines()
 
         isDocString = False
-        comment = ""
-        filePath = filePath.split("functions/")[-1].replace(".mcfunction","")
-        filePath = filePath.replace("/","-")
-        docStringDict = {
+        filePath = filePath.split("functions/")[-1].replace(".mcfunction","").replace("/","-")
+        pageData = {
             "fileName": filePath,
-            "docStringList": []
+            "contents": ""
         }
-        html = Html()
-        divData, aData = html.getReplaceData()
+        
+        contentsBlock = ''
         for lineText in lineTextList:
-            lineText = lineText.split("\n")[0].replace(" ", html.space)
+            lineText = lineText.split("\n")[0].replace(" ", self.htmlData.space)
             if (lineText.startswith("#>")) or (lineText.startswith("#") and isDocString):
                 isDocString = True
                 # アノテーションのチェックを行う
-                divData = self.checkAnnotation(lineText, divData)
-                # html要素を作成する
-                repComment = f"{html.tab * 6}{html.div}{html.ln}"
-                repComment = html.replaceValue(repComment, divData)
-                comment += repComment
+                lineText = self.checkAnnotation(lineText)
+                contentsBlock += self.htmlData.setDocBlock(lineText, 6)
             elif isDocString:
                 isDocString = False
-                docStringDict["docStringList"].append(comment)
-                comment = ""
-        return docStringDict
+                contents = self.htmlData.setDiv("contents", contentsBlock[:-1], 5)
+                pageData["contents"] = contents[:-1]
+                contentsBlock = ''
+        return pageData
 
+    def getIndex(self, filePath):
+        """目次エリアを作成する
 
-class docHtml():
-    def __init__(self, config):
-        self.config = config
-        
-        annotations = ""
-        for annotation in config["annotationsColor"].items():
-            value = annotation[0][1:]
-            color = annotation[1]
-            annotations += f".{value} {{\n\tcolor: {color};\n}}\n"
-        controlFile("./modules/annotation.module.css", "w", annotations)
-
-    def getTemplate(self, isHome=False):
-        """
-        HTMLファイルを取得する
+        Parameters
+        ----------
+        filePath : str
+            ファイルパス
 
         Returns
         -------
-        file: str
-            ファイル
+        indexData: str
+            HTMLデータ
         """
-        if isHome:
-            with open("./const/HOME.html", "r", encoding="utf-8") as f:
-                file = f.read()
-        else:
-            with open("./const/template.html", "r", encoding="utf-8") as f:
-                file = f.read()
-        return file.replace("%(theme)",self.config["theme"])
-    
+        indexName = filePath.split("functions")[-1][1:]
+        indexName = indexName.replace("/", "-").replace(".mcfunction", "")
+        indexData = self.htmlData.setIndexData("index index_color", "link link_area", indexName, f"{indexName}.html", 6)
+        return indexData[:-1]
 
-    def setIndex(self, value, linkPath):
-        """
-        目次を作成する
-
-        Parameters
-        ----------
-        value : str
-            リンクの名前
-        linkPath : str
-            リンクのパス
-        """
-        html = Html()
-
-        indexData = f"{html.tab * 5}{html.div}{html.ln}"
-        indexData = html.replaceValue(indexData)
-
-    def setHtml(self, baseData):
-        """
-        HTMLファイルを設定する
-
-        Parameters
-        ----------
-        baseData : dict
-            ドキュメント用のデータが格納された事象
-        """
-        html = Html()
-        divData, aData =html.getReplaceData()
-        # 目次を作成
-        indexData = ""
-        for index in baseData["contents"]:
-            aData["aValue"] = index["fileName"]
-            aData["aClass"] = "link_color"
-            aData["aPath"] = f"./{index['fileName']}.html"
-            data = f"{html.tab * 6}{html.a}{html.ln}"
-            data = html.replaceValue(data, aData=aData)
-            divData["divClass"] = "link link_area"
-            divData["divValue"] = f"{html.ln}{data}{html.tab * 5}"
-            div = f"{html.tab * 5}{html.div}{html.ln}"
-            div = html.replaceValue(div, divData)
-            indexData += div
-        
-        # 内容を作成
-        for data in baseData["contents"]:
-            title = f"{baseData['folderName']}:{data['fileName']}"
-            divData["divClass"] = "contents"
-            contents = ""
-            for string in data["docStringList"]:
-                stringBlock = f"{html.tab * 5}{html.div}{html.ln}"
-                divData["divValue"] = f"{html.ln}{string}{html.tab * 5}"
-                stringBlock = html.replaceValue(stringBlock, divData)
-                contents += stringBlock
-            file = self.getTemplate()
-            file = self.setContents(file, contents[: -1], title, indexData[:-1])
-            self.writeHtml(baseData['folderName'], data['fileName'], file)
-        # return indexData
-
-
-    def setHome(self, folderList):
-        file = self.getTemplate(True)
-        title = "HOME"
-        index = ""
-        for folderName in folderList:
-            index += self.setIndex(folderName, f"./{folderName}/Index.html")
-        file = self.setContents(file, "", title, index)
-        self.writeHtml("", "HOME", file)
-
-
-    def setContents(self, file, contents, title, index):
-        """ファイルコンテンツを設定する
+    def makeHtml(self, file, docData, folderName, theme):
+        """HTMLファイルを作成する
 
         Parameters
         ----------
         file : str
-            ファイル
-        contents : str
-            ドキュメント本体
-        title : str
-            タイトル
-        index : str
-            目次
-
-        Returns
-        -------
-        file : str
-            HTMLファイル情報
-        """
-        file = file.replace("%(TITLE)", title)
-        file = file.replace("%(CONTENTS)", contents)
-        file = file.replace("%(INDEX)", index)
-        return file
-    
-    def writeHtml(self, folderName, fileName, fileData):
-        """HTMLファイルを出力する
-
-        Parameters
-        ----------
+            HTMLデータ
+        docData : dict
+            ドキュメントデータ
         folderName : str
             フォルダ名
-        fileName : str
-            ファイル名
-        fileData : str
-            ファイルデータ
+        theme : str
+            テーマ
         """
-        makeFolder(f"./docs/{folderName}")
-        controlFile(f"./docs/{folderName}/{fileName}.html", "w", fileData)
+        for page in docData["page"]:
+            file = controlFile("./const/template.html", "r")
+            fileName = page["fileName"]
+            contents = page["contents"]
+            file = self.htmlData.setContents(file, contents)
+            file = self.htmlData.setTitle(file, fileName)
+            file = self.htmlData.setIndex(file, docData["index"])
+            file = self.htmlData.setTheme(file, theme)
+            makeFolder(f"./docs/{folderName}")
+            controlFile(f"./docs/{folderName}/{fileName}.html", "w", file)
+        
+        # 目次を作成する
+        file = controlFile("./const/template.html", "r")
+        file = self.htmlData.setContents(file, "")
+        file = self.htmlData.setTitle(file, folderName)
+        file = self.htmlData.setIndex(file, docData["index"])
+        file = self.htmlData.setTheme(file, theme)
+        controlFile(f"./docs/{folderName}/INDEX.html", "w", file)
+    
+    def makeHome(self, folderList, theme):
+        """HOMEを作成する
 
+        Parameters
+        ----------
+        folderList : list
+            フォルダリスト
+        theme : str
+            テーマ
+        """
+        file = controlFile("./const/HOME.html", "r")
+        index = ""
+        for folderName in folderList:
+            index += self.htmlData.setIndexData("index index_color", "link link_area", folderName, f"{folderName}/INDEX.html", 6)
+        file = self.htmlData.setIndex(file, index)
+        file = self.htmlData.setTheme(file, theme)
+        controlFile(f"./docs/HOME.html", "w", file[:-1])

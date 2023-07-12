@@ -1,6 +1,5 @@
 import const.common as com
 
-
 def main():
     # パスを設定する
     config = com.getConfig()
@@ -8,7 +7,9 @@ def main():
 
     # インスタンスを作成
     folderList = com.getFolder(path)
-    html = com.docHtml(config)
+    page = com.controlFile('const/template.html', 'r')
+    # アノテーション用のCSSを作成する
+    com.setAnnotation(config["annotationsColor"])
 
     # 単体のデータパックを指定した場合パスを修正する
     if not folderList:
@@ -23,14 +24,9 @@ def main():
         datapack = com.dataPack(folderName)
         functionList = datapack.getFuntionList(path, folderName)
         # ドキュメント化可能なデータを取得する
-        baseData = datapack.getDocString(functionList)
-        # # ドキュメント出力
-        indexData = html.setHtml(baseData)
-        # html.setIndex(path, folderName, indexData)
-
-    # html.setHome(folderList)
-
+        docData = datapack.getDocString(functionList)
+        # ドキュメント出力
+        datapack.makeHtml(page, docData, folderName, config["theme"])
+    
+    datapack.makeHome(folderList, config["theme"])
 main()
-
-# test = "#&emsp;@private"
-# print("@private" in test)

@@ -8,6 +8,8 @@ def main():
     # インスタンスを作成
     folderList = com.getFolder(path)
     page = com.controlFile('const/template.html', 'r')
+    # アノテーション用のCSSを作成する
+    com.setAnnotation(config["annotationsColor"])
 
     # 単体のデータパックを指定した場合パスを修正する
     if not folderList:
@@ -25,6 +27,6 @@ def main():
         docData = datapack.getDocString(functionList)
         # ドキュメント出力
         datapack.makeHtml(page, docData, folderName, config["theme"])
-
+    
+    datapack.makeHome(folderList, config["theme"])
 main()
-

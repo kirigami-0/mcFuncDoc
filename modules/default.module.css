@@ -24,10 +24,6 @@ div {
     background-color: #aaaaFF;
 }
 
-.link_color {
-    color: #FF0000;
-}
-
 .text_color {
     color: #ffffff;
 }
@@ -46,4 +42,8 @@ div {
 
 .normal {
     color: #FFFFFF;
+}
+
+.index_color {
+    color: #161e61;
 }

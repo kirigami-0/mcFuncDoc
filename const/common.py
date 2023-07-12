@@ -12,8 +12,8 @@ def getConfig():
     config : dict
         設定データ
     """
-    with open("./config.json", "r", encoding="utf-8") as f:
-        config = json.load(f)
+    config = controlFile("./config.json", "r")
+    config = json.loads(config)
     return config
 
 
@@ -40,7 +40,7 @@ def getFolder(path):
     return folderList
 
 
-def controlFile(path, mode, fileData=""):
+def controlFile(path, mode, fileData={}):
     """ファイルを操作する
 
     Parameters
@@ -76,6 +76,22 @@ def makeFolder(path):
         作成したいパス
     """
     os.makedirs(path, exist_ok=True)
+
+
+def setAnnotation(annotations):
+    """アノテーション用のCSSを作成する
+
+    Parameters
+    ----------
+    annotations : dict
+        config上のアノテーションカラー
+    """
+    annotationsColor = ""
+    for key, color in annotations.items():
+        className = ".%(KEY) {\n\tcolor: %(COLOR); \n}\n"
+        className = className.replace("%(KEY)", key[1:]).replace("%(COLOR)", color)
+        annotationsColor += className
+    controlFile("modules/annotation.module.css", "w", annotationsColor)
 
 class dataPack:
     def __init__(self, folderName):
@@ -202,9 +218,21 @@ class dataPack:
         return pageData
 
     def getIndex(self, filePath):
+        """目次エリアを作成する
+
+        Parameters
+        ----------
+        filePath : str
+            ファイルパス
+
+        Returns
+        -------
+        indexData: str
+            HTMLデータ
+        """
         indexName = filePath.split("functions")[-1][1:]
         indexName = indexName.replace("/", "-").replace(".mcfunction", "")
-        indexData = self.htmlData.setIndexData("link_color", "link link_area", indexName, f"{indexName}.html", 6)
+        indexData = self.htmlData.setIndexData("index index_color", "link link_area", indexName, f"{indexName}.html", 6)
         return indexData[:-1]
 
     def makeHtml(self, file, docData, folderName, theme):
@@ -231,3 +259,29 @@ class dataPack:
             file = self.htmlData.setTheme(file, theme)
             makeFolder(f"./docs/{folderName}")
             controlFile(f"./docs/{folderName}/{fileName}.html", "w", file)
+        
+        # 目次を作成する
+        file = controlFile("./const/template.html", "r")
+        file = self.htmlData.setContents(file, "")
+        file = self.htmlData.setTitle(file, folderName)
+        file = self.htmlData.setIndex(file, docData["index"])
+        file = self.htmlData.setTheme(file, theme)
+        controlFile(f"./docs/{folderName}/INDEX.html", "w", file)
+    
+    def makeHome(self, folderList, theme):
+        """HOMEを作成する
+
+        Parameters
+        ----------
+        folderList : list
+            フォルダリスト
+        theme : str
+            テーマ
+        """
+        file = controlFile("./const/HOME.html", "r")
+        index = ""
+        for folderName in folderList:
+            index += self.htmlData.setIndexData("index index_color", "link link_area", folderName, f"{folderName}/INDEX.html", 6)
+        file = self.htmlData.setIndex(file, index)
+        file = self.htmlData.setTheme(file, theme)
+        controlFile(f"./docs/HOME.html", "w", file[:-1])
